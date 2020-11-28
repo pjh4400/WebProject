@@ -1,0 +1,35 @@
+{
+  "name": "webproject-frontend",
+  "version": "1.0.0",
+  "description": "2020-2 webprogramming project frontend",
+  "main": "index.js",
+  "scripts": {
+    "dev": "webpack-dev-server --hot",
+    "start": "node server.js"
+  },
+  "author": "jaehee",
+  "license": "ISC",
+  "dependencies": {
+    "@material-ui/core": "^4.11.0",
+    "@material-ui/icons": "^4.9.1",
+    "axios": "^0.21.0",
+    "clean-webpack-plugin": "^3.0.0",
+    "css-loader": "^5.0.1",
+    "react": "^17.0.1",
+    "react-dom": "^17.0.1",
+    "react-router-dom": "^5.2.0",
+    "style-loader": "^2.0.0"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.12.3",
+    "@babel/preset-env": "^7.12.1",
+    "@babel/preset-react": "^7.12.5",
+    "@hot-loader/react-dom": "^16.13.0",
+    "babel-loader": "^8.2.1",
+    "react-hot-loader": "^4.12.21",
+    "html-webpack-plugin": "^4.5.0",
+    "webpack": "^4.44.1",
+    "webpack-cli": "^3.3.12",
+    "webpack-dev-server": "^3.11.0"
+  }
+}

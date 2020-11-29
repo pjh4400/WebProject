@@ -9,7 +9,6 @@ const Login = ({ history }) => {
   });
 
   const onChangeForm = (e) => {
-    e.preventDefault();
     setForm({
       ...form,
       [e.target.name]: e.target.value,
@@ -24,15 +23,17 @@ const Login = ({ history }) => {
         password: form.password,
       })
       .then((res) => {
-        alert(res.data.message);
-        switch (res.data.status) {
-          case 200:
-            history.push("/");
-            break;
-          case 403:
-            break;
+        if (res.data.success) {
+          // API 요청 할때마다 헤더에 Token 담아 전송
+          axios.defaults.headers.common[
+            "Authorization"
+          ] = `Bearer ${res.data.token}`;
+          localStorage.setItem("user", JSON.stringify(form.id));
+          history.push("/");
+        } else {
+          console.log(res);
+          alert(res.data.message);
         }
-        console.log(res);
       })
       .catch((error) => {
         console.log(error);

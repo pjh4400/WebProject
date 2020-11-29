@@ -26,15 +26,13 @@ const Join = ({history}) => {
           password: form.password,
         })
         .then((res) => {
-          alert(res.data.message);
-          switch(res.data.status){
-            case 200:
-              history.push("/");
-              break;
-            case 403:
-              break;
+          if(res.data.success){
+            alert(res.data.message);
+            history.push("/");
+          } else {
+            alert(res.data.message);
           }
-          console.log(res);
+          alert(res.data.message);
         })
         .catch((error) => {
           console.log(error);

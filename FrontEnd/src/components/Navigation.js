@@ -1,8 +1,7 @@
-import React from "react";
+import React, { useEffect } from "react";
 import axios from "axios";
 import { NavLink } from "react-router-dom";
 import { Button } from "@material-ui/core";
-
 
 const Navigation = () => {
   const onLogout = (e) => {
@@ -11,7 +10,8 @@ const Navigation = () => {
       axios
         .get("api/auth/logout")
         .then((res) => {
-        console.log(res);
+          console.log(res);
+          localStorage.removeItem("user");
           alert(res.data.message);
         })
         .catch((error) => {
@@ -26,13 +26,21 @@ const Navigation = () => {
       <Button component={NavLink} to="/">
         홈
       </Button>
-      <Button component={NavLink} to="/join">
-        회원가입
+      <Button component={NavLink} to="/board">
+        게시판
       </Button>
-      <Button component={NavLink} to="/login">
-        로그인
-      </Button>
-      <Button onClick={onLogout}>로그아웃</Button>
+      {localStorage.getItem("user") ? (
+        <Button onClick={onLogout}>로그아웃</Button>
+      ) : (
+        <>
+          <Button component={NavLink} to="/join">
+            회원가입
+          </Button>
+          <Button component={NavLink} to="/login">
+            로그인
+          </Button>
+        </>
+      )}
     </div>
   );
 };

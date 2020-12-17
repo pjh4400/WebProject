@@ -18,9 +18,10 @@ const PostSchema = new Schema({
     type: String,
     required: true,
   },
-  hashtag: {
-    type: String,
-  },
+  hashtags: [{
+    type: ObjectId,
+    ref: "Hashtag",
+  }],
   createAt: {
     type: Date,
     default: Date.now,

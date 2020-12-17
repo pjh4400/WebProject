@@ -1,13 +1,18 @@
 import React from "react";
-import { Typography, Button } from "@material-ui/core";
-import Navigation from "../components/Navigation";
+import { Grid, Typography } from "@material-ui/core";
+import Header from "../components/Header";
 
 const Home = () => {
+
   return (
-    <div>
-      <Typography>Home</Typography>
-      <Navigation/>
-    </div>
+    <>
+      <Header title="HOME" />
+      <Grid container direction="row" justify="center" alignItems="center">
+        <Typography variant="h4" align="center">
+          환영합니다 !
+        </Typography>
+      </Grid>
+    </>
   );
 };
 

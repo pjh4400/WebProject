@@ -4,8 +4,8 @@ const connect = () => {
   if (process.env.NODE_ENV !== 'production') {
     mongoose.set('debug', true);
   }
-  mongoose.connect(process.env.MONGO_URL, {
-    dbName: 'webproject',
+  mongoose.connect(process.env.MONGO_URL, { //mongo url .env 에 있음 MONGO_URL="mongodb://admin:admin@localhost:27017/admin"
+    dbName: 'webproject', //dbname 설정
     useNewUrlParser: true,
     useCreateIndex: true,
   }, (error) => {

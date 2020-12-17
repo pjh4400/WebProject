@@ -4,8 +4,7 @@
   "description": "2020-2 webprogramming project frontend",
   "main": "index.js",
   "scripts": {
-    "dev": "webpack-dev-server --hot",
-    "start": "node server.js"
+    "start": "webpack-dev-server --hot"
   },
   "author": "jaehee",
   "license": "ISC",

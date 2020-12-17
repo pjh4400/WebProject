@@ -6,7 +6,7 @@ const { CleanWebpackPlugin } = require('clean-webpack-plugin');
 const port = process.env.PORT || 8080;
 
 module.exports = {
-    name: 'market-balgyun',
+    name: 'webproject',
     mode: 'development', // 실서비스 할 때: production
     devtool: 'eval', 
     resolve: {

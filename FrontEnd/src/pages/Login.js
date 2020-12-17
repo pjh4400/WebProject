@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import axios from "axios";
-import { TextField, Button } from "@material-ui/core";
+import { Grid, TextField, Button } from "@material-ui/core";
+import Header from "../components/Header";
 
 const Login = ({ history }) => {
   const [form, setForm] = useState({
@@ -24,11 +25,7 @@ const Login = ({ history }) => {
       })
       .then((res) => {
         if (res.data.success) {
-          // API 요청 할때마다 헤더에 Token 담아 전송
-          axios.defaults.headers.common[
-            "Authorization"
-          ] = `Bearer ${res.data.token}`;
-          localStorage.setItem("user", JSON.stringify(form.id));
+          localStorage.setItem("user", form.id);
           history.push("/");
         } else {
           console.log(res);
@@ -43,26 +40,28 @@ const Login = ({ history }) => {
 
   return (
     <>
-      <h1>로그인</h1>
-      <form onSubmit={onLogin}>
-        <TextField
-          name="id"
-          onChange={onChangeForm}
-          required
-          fullWidth
-          label="아이디"
-          autoFocus
-        />
-        <TextField
-          name="password"
-          type="password"
-          onChange={onChangeForm}
-          required
-          fullWidth
-          label="비밀번호"
-        />
-        <Button type="submit">로그인</Button>
-      </form>
+      <Header title="LOGIN" />
+      <Grid container direction="row" justify="center" alignItems="center">
+        <form onSubmit={onLogin}>
+          <TextField
+            name="id"
+            onChange={onChangeForm}
+            required
+            fullWidth
+            label="아이디"
+            autoFocus
+          />
+          <TextField
+            name="password"
+            type="password"
+            onChange={onChangeForm}
+            required
+            fullWidth
+            label="비밀번호"
+          />
+          <Button type="submit">로그인</Button>
+        </form>
+      </Grid>
     </>
   );
 };

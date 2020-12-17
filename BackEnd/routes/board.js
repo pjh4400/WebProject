@@ -9,9 +9,12 @@ const router = express.Router();
 
 
 router.get("/", async (req, res, next) => {
+  const { postID } = req.params;
+  console.log(req.query);
+  console.log(req.params);
   try {
-    if(req.query.postID){
-      console.log(req.query.postID);
+    if(postID){
+      console.log(postID);
     } else{
       await Post.find({})
       .populate({

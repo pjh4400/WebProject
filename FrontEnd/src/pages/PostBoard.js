@@ -5,7 +5,7 @@ import Header from "../components/Header";
 import { useParams } from "react-router-dom";
 
 const PostBoard = ({ history }) => {
-  const { path } = useParams();
+  const { postID } = useParams();
   const [form, setForm] = useState({
     title: "",
     content: "",
@@ -16,10 +16,17 @@ const PostBoard = ({ history }) => {
       alert("로그인이 필요합니다.");
       history.push("/login");
     }
-    if (path) {
-      console.log(path);
-
-
+    if (postID) {
+      axios
+      .get("api/board", {
+          params: {
+              postID: postID,
+          },
+      }).then((res) => {
+        console.log(res);
+      }).catch((err) => {
+        console.log(err);
+      });
     }
   }, []);
 

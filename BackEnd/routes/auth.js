@@ -1,7 +1,6 @@
 const express = require("express");
 const bycrypt = require("bcrypt");
 const passport = require("passport");
-const jwt = require("jsonwebtoken");
 const { isLoggedIn, isNotLoggedIn } = require("./middlewares");
 const User = require("../models/User");
 
@@ -42,17 +41,11 @@ router.post("/login", isNotLoggedIn, async (req, res, next) => {
       if (loginError) {
         return next(loginError);
       }
-      const token = jwt.sign({ id: user.id }, process.env.JWT_SECRET,
-        {
-            expiresIn: '7d'
-        });
       return res.status(200).json({
         success: true,
         message: "로그인 되었습니다.",
-        token,
       });
     });
-    // 클라이언트에게 JWT생성 후 반환
   })(req, res, next);
 });
 

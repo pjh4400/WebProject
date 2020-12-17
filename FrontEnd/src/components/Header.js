@@ -3,6 +3,7 @@ import axios from "axios";
 import { NavLink } from "react-router-dom";
 import { Grid, ButtonGroup, Button, Typography } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
+import { useHistory } from 'react-router-dom';
 
 const useStyles = makeStyles((theme) => ({
   header: {
@@ -22,7 +23,8 @@ const useStyles = makeStyles((theme) => ({
 const Header = ({ title }) => {
   const [user, setUser] = useState(localStorage.getItem("user"));
   const classes = useStyles();
-
+  const history = useHistory();
+  
   const onLogout = (e) => {
     e.preventDefault();
     if (confirm("로그아웃하시겠습니까?")) {

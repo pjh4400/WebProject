@@ -77,14 +77,14 @@ router.post("/", isLoggedIn, upload2.none(), async (req, res, next) => {
           })
         )
       );
-      const gallery = Gallery.create({
+      await Gallery.create({
         author: req.user._id,
         img: img.url,
         content: content,
         hashtags: realtags,
       });
     } else {
-      const gallery = Gallery.create({
+      await Gallery.create({
         author: req.user._id,
         img: img.url,
         content: content,
@@ -101,11 +101,12 @@ router.post("/", isLoggedIn, upload2.none(), async (req, res, next) => {
 /* 해시태그 검색 */
 router.get("/search/:hashtag", async (req, res, next) => {
   try {
-    Hashtag.findOne({
+    await Hashtag.findOne({
       hashtag: req.params.hashtag,
     })
-      .then((hashtag) => {
-        Gallery.find({ "hashtags": hashtag._id})
+      .then((data) => {
+        if(!data) res.json({ success: false, message: "해당 해시태그가 없습니다."});
+        else Gallery.find({ "hashtags": hashtag._id})
        . populate({
           path: "author",
         })
@@ -158,11 +159,11 @@ router.put("/:id", isLoggedIn, (req, res, next) => {
 });
 
 /* 게시글 삭제 */
-router.delete("/:id", isLoggedIn, (req, res, next) => {
+router.delete("/:id", isLoggedIn, async (req, res, next) => {
   console.log("삭제");
   console.log(req.params.id);
   if (req.params.id) {
-    Gallery.deleteOne(
+    await Gallery.deleteOne(
       { _id: req.params.id, author: req.user._id },
       (err, result) => {
         if (err) {

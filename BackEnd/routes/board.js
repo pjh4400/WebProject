@@ -6,15 +6,22 @@ const { isLoggedIn } = require("./middlewares");
 
 const router = express.Router();
 
+
+
 router.get("/", async (req, res, next) => {
   try {
-    Post.find({})
+    if(req.query.postID){
+      console.log(req.query.postID);
+    } else{
+      await Post.find({})
       .populate({
         path: "author",
       })
       .exec((err, data) => {
         res.status(201).json(data);
       });
+    }
+
   } catch (err) {
     console.error(err);
     next(err);
@@ -32,10 +39,6 @@ router.get("/searchContent/:content", async (req, res, next) => {
         .then((post) => {
           console.log(post);
           res.json({ success: true, post: post });
-        })
-        .catch((err) => {
-          console.error(err);
-          next(err);
         });
     } catch (err) {
       console.error(err);
@@ -50,24 +53,38 @@ router.get("/searchID/:id", async (req, res, next) => {
   try {
     User.findOne({
       id: req.params.id,
-    })
-      .then((user) => {
-        Post.find({
-          author: user._id,
-        })
-          .populate("author")
+    }).then((user) => {
+      Post.find({
+        author: user._id,
+      })
+        .populate("author")
+        .then((post) => {
+          res.json({ success: true, post: post });
+        });
+    });
+  } catch (err) {
+    console.error(err);
+    next(err);
+  }
+});
+
+/* 해시태그 검색 */
+router.get("/searchHashtag/:hashtag", async (req, res, next) => {
+  try {
+    await Hashtag.findOne({
+      hashtag: req.params.hashtag,
+    }).then((data) => {
+      if (!data)
+        res.json({ success: false, message: "해당 해시태그가 없습니다." });
+      else
+        Post.find({ hashtags: data._id })
+          .populate({
+            path: "author",
+          })
           .then((post) => {
             res.json({ success: true, post: post });
-          })
-          .catch((err) => {
-            console.error(err);
-            next(err);
           });
-      })
-      .catch((err) => {
-        console.error(err);
-        next(err);
-      });
+    });
   } catch (err) {
     console.error(err);
     next(err);
@@ -78,7 +95,8 @@ router.get("/searchID/:id", async (req, res, next) => {
 router.post("/", isLoggedIn, async (req, res, next) => {
   const { title, content } = req.body;
   try {
-    const hashtags = req.body.content.match(/#[^\s#]+/g);
+    const hashtags = content.match(/#[^\s#]+/g);
+    console.log("해시태그: " + hashtags);
     if (hashtags) {
       let realtags = [];
       await Promise.all(
@@ -89,11 +107,12 @@ router.post("/", isLoggedIn, async (req, res, next) => {
             if (data) {
               realtags.push(data._id);
             } else {
-              Hashtag.create({ hashtag: tag.slice(1).toLowerCase() }).then(
-                (result) => {
-                  realtags.push(result._id);
-                }
-              );
+              const hashtag = new Hashtag({
+                hashtag: tag.slice(1).toLowerCase(),
+              });
+              hashtag.save().then((result) => {
+                realtags.push(result._id);
+              });
             }
           })
         )
@@ -119,11 +138,10 @@ router.post("/", isLoggedIn, async (req, res, next) => {
 });
 
 /* 게시글 수정 */
-router.put("/", isLoggedIn, (req, res, next) => {
-  console.log("===========================================");
+router.put("/", isLoggedIn, async (req, res, next) => {
   const { postID, title, content } = req.body;
   if (postID) {
-    Post.updateOne(
+    await Post.updateOne(
       { _id: postID, author: req.user._id },
       {
         $set: {

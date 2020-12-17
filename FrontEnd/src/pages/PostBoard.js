@@ -5,17 +5,21 @@ import Header from "../components/Header";
 import { useParams } from "react-router-dom";
 
 const PostBoard = ({ history }) => {
-  const { postID } = useParams();
+  const { path } = useParams();
   const [form, setForm] = useState({
     title: "",
     content: "",
   });
 
-
   useEffect(() => {
     if (!localStorage.getItem("user")) {
       alert("로그인이 필요합니다.");
       history.push("/login");
+    }
+    if (path) {
+      console.log(path);
+
+
     }
   }, []);
 
@@ -49,7 +53,7 @@ const PostBoard = ({ history }) => {
   const onPut = () => {
     console.log(postID);
     axios
-      .put("http://localhost:3000/board", {
+      .put("/api/board", {
         title: form.title,
         content: form.content,
         postID: postID,
@@ -100,9 +104,13 @@ const PostBoard = ({ history }) => {
         </Grid>
         <Grid item xs={12} sm={8} align="center">
           {postID ? (
-            <Button onClick={onPut} size="large">수정</Button>
+            <Button onClick={onPut} size="large">
+              수정
+            </Button>
           ) : (
-            <Button onClick={onPost} size="large">등록</Button>
+            <Button onClick={onPost} size="large">
+              등록
+            </Button>
           )}
         </Grid>
       </Grid>

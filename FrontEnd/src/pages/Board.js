@@ -112,6 +112,33 @@ const Board = ({ history }) => {
       });
   };
 
+  const onSearchByHashtag = (e) => {
+    e.preventDefault();
+    console.log(e.currentTarget.hashtag.value);
+    axios
+      .get("api/board/searchHashtag/" + e.currentTarget.hashtag.value, {})
+      .then((res) => {
+        let tmp = [];
+        if(res.data.success){
+          res.data.post.map((post) => {
+            tmp.push({
+              postID: post._id,
+              author: post.author.id,
+              content: post.content,
+              title: post.title,
+              createAt: post.createAt,
+            });
+          });
+          setBoard(tmp);
+        } else{
+          alert(res.data.message);
+        }
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+  };
+
   const onDelete = (id) => {
     if (confirm("정말 삭제하시겠습니까?")) {
       axios
@@ -133,7 +160,7 @@ const Board = ({ history }) => {
     <>
       <Header title="BOARD" />
       <Grid container direction="row" justify="center" alignItems="center">
-        <Grid item xs={12} sm={6} align="right" style={{padding: "10"}}>
+        <Grid item xs={12} sm={7} align="center">
           <form onSubmit={onSearchByContent}>
             <TextField
               name="content"
@@ -152,12 +179,31 @@ const Board = ({ history }) => {
             />
           </form>
         </Grid>
-        <Grid item xs={12} sm={6} align="left"  style={{padding: "10"}}>
+        <Grid item xs={12} sm={7} align="center">
           <form onSubmit={onSearchByID}>
             <TextField
               name="id"
               required
               label="사용자 ID로 검색하기"
+              autoFocus
+              InputProps={{
+                endAdornment: (
+                  <InputAdornment>
+                    <Button type="submit">
+                      <SearchIcon />
+                    </Button>
+                  </InputAdornment>
+                ),
+              }}
+            />
+          </form>
+        </Grid>
+        <Grid item xs={12} sm={7} align="center">
+          <form onSubmit={onSearchByHashtag}>
+            <TextField
+              name="hashtag"
+              required
+              label="해시태그로 검색하기"
               autoFocus
               InputProps={{
                 endAdornment: (
@@ -184,15 +230,17 @@ const Board = ({ history }) => {
         {board.map((post) => (
           <Grid item key={post.postID} xs={12} sm={7} align="center">
             <Card>
-              <CardContent elevation={2} style={{margin: "5"}}>
-                <Typography variant="body1">{post.createAt.split("T")[0]}</Typography>
+              <CardContent elevation={2} style={{ margin: "5" }}>
+                <Typography variant="body1">
+                  {post.createAt.split("T")[0]}
+                </Typography>
                 <Typography variant="body1">작성자 : {post.author}</Typography>
                 <Typography variant="h6">제목 : {post.title}</Typography>
                 <Typography variant="h6"> {post.content}</Typography>
                 {localStorage.getItem("user") == post.author && (
-                  <ButtonGroup style={{margin: "5"}}>
+                  <ButtonGroup style={{ margin: "5" }}>
                     <Button
-                      onClick={() => history.push("/postBoard/" + post.postID)}
+                      onClick={() => history.push("/postBoard/"+post.postID)}
                     >
                       수정
                     </Button>

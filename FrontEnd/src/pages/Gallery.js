@@ -79,16 +79,20 @@ const Gallery = () => {
       .get("api/gallery/search/" + e.currentTarget.hashtag.value, {})
       .then((res) => {
         let tmp = [];
-        res.data.post.map((post) => {
-          tmp.push({
-            postID: post._id,
-            author: post.author.id,
-            content: post.content,
-            img: post.img,
-            createAt: post.createAt,
+        if(res.data.success){
+          res.data.post.map((post) => {
+            tmp.push({
+              postID: post._id,
+              author: post.author.id,
+              content: post.content,
+              img: post.img,
+              createAt: post.createAt,
+            });
           });
-        });
-        setGallery(tmp);
+          setGallery(tmp);
+        } else {
+          alert(res.data.message);
+        }
       })
       .catch((error) => {
         console.log(error);

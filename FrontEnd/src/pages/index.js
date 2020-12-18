@@ -6,3 +6,4 @@ export { default as Gallery } from './Gallery.js';
 export { default as Board } from './Board.js';
 export { default as PostBoard } from './PostBoard.js';
 export { default as PostGallery } from './PostGallery.js';
+export { default as Message } from './Message.js';

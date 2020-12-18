@@ -27,8 +27,19 @@ const useStyles = makeStyles((theme) => ({
 
 const Gallery = () => {
   const [gallery, setGallery] = useState([]);
+  const [modify, setModify] = useState({
+    postID: "",
+    content: "",
+  });
 
   const classes = useStyles();
+
+  const onChangeModify = (e) => {
+    setModify({
+      ...modify,
+      [e.target.name]: e.target.value,
+    });
+  };
 
   const getPosts = () => {
     axios
@@ -60,7 +71,6 @@ const Gallery = () => {
       axios
         .delete("api/gallery/" + id, {})
         .then((res) => {
-          console.log(res);
           if (res.data.success) {
             alert(res.data.message);
             getPosts();
@@ -74,12 +84,12 @@ const Gallery = () => {
 
   const onSearchByHashtag = (e) => {
     e.preventDefault();
-    console.log(e.currentTarget.hashtag.value);
     axios
       .get("api/gallery/search/" + e.currentTarget.hashtag.value, {})
       .then((res) => {
+        console.log(res.data.post);
         let tmp = [];
-        if(res.data.success){
+        if (res.data.success) {
           res.data.post.map((post) => {
             tmp.push({
               postID: post._id,
@@ -98,6 +108,29 @@ const Gallery = () => {
         console.log(error);
       });
   };
+
+    /* 수정 */
+  const onPut = () => {
+    axios
+      .put("api/gallery/", {
+        postID: modify.postID,
+        content: modify.content,
+      })
+      .then((res) => {
+        setModify({
+          postID: "",
+          img: "",
+          content: "",
+        })
+        getPosts();
+        console.log(res);
+      })
+      .catch((error) => {
+        console.log(error);
+        alert("서버 에러");
+      });
+  };
+
 
   return (
     <>
@@ -129,20 +162,48 @@ const Gallery = () => {
             </Button>
           </Grid>
         </Grid>
-        {gallery &&
-          gallery.map((post) => (
-            <Grid item xs={12} sm={7} key={post._id} align="center">
-              <Card elevation={2} style={{margin: "5"}}>
-                <CardContent>
-                  <Typography variant="h6">{post.createAt.split("T")[0]}</Typography>
+        {gallery.map((post) => (
+          <Grid item key={post.postID} xs={12} sm={7} align="center">
+            <Card>
+              {post.postID === modify.postID ? (
+                <CardContent elevation={2} style={{ margin: "5" }}>
+                  <Grid item xs={12} sm={8} align="center" style={{ padding: "5" }}>
+                  <img src={"api/" + post.img} width="480" height="320" />
+                  </Grid>
+                  <Grid item xs={12} sm={5} align="center" style={{  padding: "5" }}>
+                    <TextField
+                      type="text"
+                      name="content"
+                      onChange={onChangeModify}
+                      required
+                      variant="outlined"
+                      fullWidth
+                      label="내용 및 해시태그"
+                      value={modify.content}
+                    />
+                  </Grid>
+                  <Grid item xs={12} sm={8} align="center">
+                    <Button onClick={onPut} size="large">
+                      수정
+                    </Button>
+                  </Grid>
+                </CardContent>
+              ) : (
+                <CardContent elevation={2} style={{ margin: "5" }}>
+                  <Typography variant="h6">
+                    {post.createAt.split("T")[0]}
+                  </Typography>
                   <Typography variant="h6">작성자 : {post.author}</Typography>
                   <img src={"api/" + post.img} width="480" height="320" />
                   <Typography variant="h6">{post.content}</Typography>
                   {localStorage.getItem("user") == post.author && (
-                    <ButtonGroup style={{margin: "5"}}>
+                    <ButtonGroup style={{ margin: "5" }}>
                       <Button
                         onClick={() =>
-                          history.push("/postGallery/" + post.postID)
+                          setModify({
+                            postID: post.postID,
+                            content: post.content,
+                          })
                         }
                       >
                         수정
@@ -153,9 +214,10 @@ const Gallery = () => {
                     </ButtonGroup>
                   )}
                 </CardContent>
-              </Card>
-            </Grid>
-          ))}
+              )}
+            </Card>
+          </Grid>
+        ))}
       </Grid>
     </>
   );

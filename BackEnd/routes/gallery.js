@@ -55,7 +55,6 @@ router.post("/img", isLoggedIn, upload.single("img"), (req, res) => {
 const upload2 = multer();
 router.post("/", isLoggedIn, upload2.none(), async (req, res, next) => {
   const { img, content } = req.body;
-  console.log(req.body);
   try {
     const hashtags = content.match(/#[^\s#]+/g);
     if (hashtags) {
@@ -64,15 +63,15 @@ router.post("/", isLoggedIn, upload2.none(), async (req, res, next) => {
         hashtags.map((tag) =>
           Hashtag.findOne({
             hashtag: tag.slice(1).toLowerCase(),
-          }).then((data) => {
+          }).then( async (data) => {
             if (data) {
               realtags.push(data._id);
             } else {
-              Hashtag.create({ hashtag: tag.slice(1).toLowerCase() }).then(
-                (result) => {
-                  realtags.push(result._id);
-                }
-              );
+              await Hashtag.create({
+                hashtag: tag.slice(1).toLowerCase(),
+              }).then((result) => {
+                realtags.push(result._id);
+              });
             }
           })
         )
@@ -90,7 +89,6 @@ router.post("/", isLoggedIn, upload2.none(), async (req, res, next) => {
         content: content,
       });
     }
-    //const result = await Gallery.populate(gallery, { path: "author" });
     res.status(201).json({ success: true, message: "등록되었습니다." });
   } catch (error) {
     console.error(error);
@@ -100,13 +98,13 @@ router.post("/", isLoggedIn, upload2.none(), async (req, res, next) => {
 
 /* 해시태그 검색 */
 router.get("/search/:hashtag", async (req, res, next) => {
-  try {
+  try {  
     await Hashtag.findOne({
       hashtag: req.params.hashtag,
     })
       .then((data) => {
         if(!data) res.json({ success: false, message: "해당 해시태그가 없습니다."});
-        else Gallery.find({ "hashtags": hashtag._id})
+        else Gallery.find({ "hashtags": data._id})
        . populate({
           path: "author",
         })
@@ -129,35 +127,6 @@ router.get("/search/:hashtag", async (req, res, next) => {
 });
 
 
-
-/* 게시글 수정 */
-router.put("/:id", isLoggedIn, (req, res, next) => {
-  console.log(req.params.id);
-  if (req.params.id) {
-    console.log(req.params.postID);
-    /*
-    Gallery.updateOne(
-      { _id: req.params.postID, author: req.user._id },
-      {
-        $set: {
-          title: req.params.title,
-          content: req.params.content,
-        },
-      },
-      (err, result) => {
-        if (err) {
-          console.log(err);
-        }
-        console.log(result);
-        res.json({ success: true, message: "수정되었습니다." });
-      }
-    );
-    */
-  } else {
-    next("아이디없음");
-  }
-});
-
 /* 게시글 삭제 */
 router.delete("/:id", isLoggedIn, async (req, res, next) => {
   console.log("삭제");
@@ -177,4 +146,65 @@ router.delete("/:id", isLoggedIn, async (req, res, next) => {
   }
 });
 
+/* 게시물 수정 */
+router.put("/", isLoggedIn, async (req, res, next) => {
+  const { postID, content } = req.body;
+  if (postID) {
+    const hashtags = content.match(/#[^\s#]+/g);
+    if (hashtags) {
+      let realtags = [];
+      await Promise.all(
+        hashtags.map((tag) =>
+          Hashtag.findOne({
+            hashtag: tag.slice(1).toLowerCase(),
+          }).then( async (data) => {
+            if (data) {
+              realtags.push(data._id);
+            } else {
+              await Hashtag.create({
+                hashtag: tag.slice(1).toLowerCase(),
+              }).then((result) => {
+                realtags.push(result._id);
+              });
+            }
+          })
+        )
+      );
+      await Gallery.updateOne(
+        { _id: postID, author: req.user._id },
+        {
+          $set: {
+            content: content,
+            hashtags: realtags,
+          },
+        },
+        (err, result) => {
+          if (err) {
+            console.log(err);
+          }
+          res.json({ success: true, message: "수정되었습니다." });
+        }
+      );
+    } else {
+      await Gallery.updateOne(
+        { _id: postID, author: req.user._id },
+        {
+          $set: {
+            content: content,
+            hashtags: [],
+          },
+        },
+        (err, result) => {
+          if (err) {
+            console.log(err);
+          }
+          res.json({ success: true, message: "수정되었습니다." });
+        }
+      );
+    }
+   
+  } else {
+    next("아이디없음");
+  }
+});
 module.exports = router;

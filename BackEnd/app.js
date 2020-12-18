@@ -15,6 +15,7 @@ dotenv.config();
 const authRouter = require("./routes/auth");
 const boardRouter = require("./routes/board");
 const galleryRouter = require("./routes/gallery");
+const msgRouter = require("./routes/msg");
 const passportConfig = require("./passport");
 
 const app = express();
@@ -53,6 +54,7 @@ app.use("/img", express.static(path.join(__dirname, "uploads")));
 app.use("/auth", authRouter);
 app.use("/board", boardRouter);
 app.use("/gallery", galleryRouter);
+app.use("/msg", msgRouter);
 
 app.use((req, res, next) => {
   const error = new Error(`${req.method} ${req.url} 라우터가 없습니다.`);

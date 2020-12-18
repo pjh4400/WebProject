@@ -6,32 +6,23 @@ const { isLoggedIn } = require("./middlewares");
 
 const router = express.Router();
 
-
-
+/* READ */
 router.get("/", async (req, res, next) => {
-  const { postID } = req.params;
-  console.log(req.query);
-  console.log(req.params);
   try {
-    if(postID){
-      console.log(postID);
-    } else{
-      await Post.find({})
+    await Post.find({})
       .populate({
         path: "author",
       })
       .exec((err, data) => {
         res.status(201).json(data);
       });
-    }
-
   } catch (err) {
     console.error(err);
     next(err);
   }
 });
 
-/* 게시글의 검색 기능 */
+/* 게시글 본문 검색 기능 */
 router.get("/searchContent/:content", async (req, res, next) => {
   if (req.params.content) {
     try {
@@ -94,26 +85,24 @@ router.get("/searchHashtag/:hashtag", async (req, res, next) => {
   }
 });
 
-/* 게시글 작성 */
+/* CREATE */
 router.post("/", isLoggedIn, async (req, res, next) => {
   const { title, content } = req.body;
   try {
     const hashtags = content.match(/#[^\s#]+/g);
-    console.log("해시태그: " + hashtags);
     if (hashtags) {
       let realtags = [];
       await Promise.all(
         hashtags.map((tag) =>
           Hashtag.findOne({
             hashtag: tag.slice(1).toLowerCase(),
-          }).then((data) => {
+          }).then( async (data) => {
             if (data) {
               realtags.push(data._id);
             } else {
-              const hashtag = new Hashtag({
+              await Hashtag.create({
                 hashtag: tag.slice(1).toLowerCase(),
-              });
-              hashtag.save().then((result) => {
+              }).then((result) => {
                 realtags.push(result._id);
               });
             }
@@ -140,22 +129,42 @@ router.post("/", isLoggedIn, async (req, res, next) => {
   }
 });
 
-/* 게시글 수정 */
+/* UPDATE */
 router.put("/", isLoggedIn, async (req, res, next) => {
   const { postID, title, content } = req.body;
   if (postID) {
-    await Post.updateOne(
+    const hashtags = content.match(/#[^\s#]+/g);
+    console.log("해시태그: " + hashtags);
+    let realtags = [];
+    if (hashtags) {
+      await Promise.all(
+        hashtags.map((tag) =>
+          Hashtag.findOne({
+            hashtag: tag.slice(1).toLowerCase(),
+          }).then( async (data) => {
+            if (data) {
+              realtags.push(data._id);
+            } else {
+              await Hashtag.create({
+                hashtag: tag.slice(1).toLowerCase(),
+              }).then((result) => {
+                realtags.push(result._id);
+              });
+            }
+          })
+        )
+      );
+    }
+    Post.updateOne(
       { _id: postID, author: req.user._id },
       {
         $set: {
           title: title,
           content: content,
+          hashtags: realtags,
         },
       },
       (err, result) => {
-        if (err) {
-          console.log(err);
-        }
         console.log(result);
         res.json({ success: true, message: "수정되었습니다." });
       }
@@ -165,7 +174,7 @@ router.put("/", isLoggedIn, async (req, res, next) => {
   }
 });
 
-/* 게시글 삭제 */
+/* DELETE */
 router.delete("/:id", isLoggedIn, (req, res, next) => {
   if (req.params.id) {
     Post.deleteOne(

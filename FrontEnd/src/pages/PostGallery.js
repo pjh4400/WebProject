@@ -54,24 +54,7 @@ const PostGallery = ({ history }) => {
         alert("서버 에러");
       });
   };
-
-  /* 수정 */
-  const onPut = () => {
-    console.log(postID);
-    axios
-      .put("api/gallery/", {
-        img: img,
-        content: content,
-      })
-      .then((res) => {
-        history.push("/gallery");
-        console.log(res);
-      })
-      .catch((error) => {
-        console.log(error);
-        alert("서버 에러");
-      });
-  };
+  
 
   return (
     <>
